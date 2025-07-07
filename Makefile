@@ -4,13 +4,10 @@ NAME		= lpyp.a
 
 SRC_DIR		= src
 
-SRC_FILES	= lpyp.c
+SRC_FILES	= lpyp_parse.c lpyp_help.c
 SRCS		= $(addprefix $(SRC_DIR)/, $(SRC_FILES))
 
 OBJS		= $(SRCS:.c=.o)
-
-TEST_SRC_FILES = main.c
-TEST_SRCS      = $(addprefix $(SRC_DIR)/, $(TEST_SRC_FILES))
 
 GREEN		= \033[0;32m
 BLUE		= \033[0;34m
@@ -38,10 +35,6 @@ $(NAME): $(OBJS)
 	@echo "$(YELLOW)Compiling $<...$(RESET)"
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-test: all ## Compile a test executable.
-	@echo "$(BLUE)Compiling test executable...$(RESET)"
-	@$(CC) $(CFLAGS) -o test_lpyp $(TEST_SRCS) $(NAME) $(LIBFT)
-
 clean: ## Remove object files.
 	@echo "$(RED)Cleaning object files...$(RESET)"
 	@$(RM) $(OBJS)
@@ -50,8 +43,8 @@ clean: ## Remove object files.
 fclean: ## Remove all generated files.
 	@echo "$(RED)Cleaning object files...$(RESET)"
 	@$(RM) $(OBJS)
-	@echo "$(RED)Cleaning library and executable...$(RESET)"
-	@$(RM) $(NAME) test_lpyp
+	@echo "$(RED)Cleaning library...$(RESET)"
+	@$(RM) $(NAME)
 	@make -s --no-print-directory -C libft fclean
 
 re: fclean all ## Re-compile the entire project.
@@ -59,4 +52,4 @@ re: fclean all ## Re-compile the entire project.
 help: ## Show this help message.
 	@egrep -h '\s##\s' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m  %-30s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: all clean fclean re test help
+.PHONY: all clean fclean re help
