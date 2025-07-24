@@ -58,6 +58,8 @@ int lpyp_help(t_lpyp_option *options, char *program_name, char *description)
 			current_width += 2;
 		if (options[i].short_name && ft_isalpha(options[i].short_name) && options[i].long_name)
 			current_width += 2;
+		else if (!options[i].short_name || !ft_isalpha(options[i].short_name))
+			current_width += 4;
 		if (options[i].long_name)
 			current_width += 2 + ft_strlen(options[i].long_name);
 		if (options[i].flags & LPYP_REQUIRED_ARG)
@@ -102,6 +104,11 @@ int lpyp_help(t_lpyp_option *options, char *program_name, char *description)
 		{
 			ft_strlcat(option_str, ", ", max_width + 50);
 			current_width += 2;
+		}
+		else if (!options[i].short_name || !ft_isalpha(options[i].short_name))
+		{
+			ft_strlcat(option_str, "    ", max_width + 50);
+			current_width += 4;
 		}
 		
 		if (options[i].long_name)
