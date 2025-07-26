@@ -62,7 +62,7 @@ if (lpyp_parse(&data, argc, argv, options, my_parser) != 0)
 #### `t_lpyp_options`
 
 ```c
-typedef struct s_lpyp_option
+typedef struct s_lpyp_options
 {
     char            short_name;     /* Single character option (-v) */
     char            *long_name;     /* Long option name (--verbose) */

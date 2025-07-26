@@ -14,7 +14,7 @@
 #define LPYP_KEY_END		0x80000001	/* End of arguments */
 #define LPYP_KEY_UNKNOWN	0x80000002	/* Unknown option */
 
-typedef struct s_lpyp_option
+typedef struct s_lpyp_options
 {
 	char			short_name;		/* Short option name (e.g., 'v' for -v) */
 	char			*long_name;		/* Long option name (e.g., "verbose" for --verbose) */
