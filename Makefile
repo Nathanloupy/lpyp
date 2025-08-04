@@ -1,4 +1,4 @@
-# Makefile for lpyp-1.0.0
+# Makefile for lpyp-2.0.0
 
 NAME		= lpyp.a
 

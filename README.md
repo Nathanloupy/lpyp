@@ -1,6 +1,6 @@
 # LPYP - Command Line Argument Parser for C
 
-A command line argument parser for C, built using only libft functions.
+A command line argument parser for C with GNU-style help formatting, built using only libft functions.
 
 ## Quick Start
 
@@ -8,9 +8,14 @@ A command line argument parser for C, built using only libft functions.
 
 ```c
 t_lpyp_options options[] = {
-    {'v', "verbose", 'v', LPYP_NO_ARG, "Enable verbose output", NULL},
-    {'o', "output", 'o', LPYP_REQUIRED_ARG | LPYP_DENY_DUPLICATE, "Specify output file", "FILE"},
-    {'h', "help", 'h', LPYP_NO_ARG, "Show this help message", NULL},
+    {'v', "verbose", 'v', LPYP_NO_ARG, "enable verbose output", NULL},
+    {'o', "output", 'o', LPYP_REQUIRED_ARG | LPYP_DENY_DUPLICATE, "place the output into FILE", "FILE"},
+    {'O', NULL, 'O', LPYP_OPTIONAL_ARG, "optimize code (level 0-3)", "LEVEL"},
+    {0, "color", 200, LPYP_OPTIONAL_ARG, "colorize output", "WHEN"},
+    {0, "debug", 201, LPYP_NO_ARG, "enable debug mode", NULL},
+    {'h', "help", 'h', LPYP_NO_ARG, "give this help list", NULL},
+    {0, "usage", 202, LPYP_NO_ARG, "give a short usage message", NULL},
+    {0, NULL, LPYP_KEY_ARG, 0, NULL, "FILES..."},
     {0, NULL, 0, 0, NULL, NULL} /* Sentinel */
 };
 ```
@@ -28,11 +33,24 @@ int my_parser(unsigned int key, void *data, char *argument)
         case 'o':
             ((my_data_t*)data)->output_file = argument;
             break;
-        case 'h':
-            /* Handle help request */
+        case 'O':
+            ((my_data_t*)data)->optimization = argument ? ft_atoi(argument) : 2;
             break;
+        case 200: /* --color */
+            ((my_data_t*)data)->color = argument ? argument : "auto";
+            break;
+        case 201: /* --debug */
+            ((my_data_t*)data)->debug = 1;
+            break;
+        case 'h':
+            lpyp_help(options, argv[0], "Example program demonstrating LPYP.");
+            exit(0);
+        case 202: /* --usage */
+            lpyp_usage(options, argv[0]);
+            exit(0);
         case LPYP_KEY_ARG:
-            /* Handle non-option arguments */
+            /* Handle non-option arguments (FILES...) */
+            add_file_to_list(data, argument);
             break;
         case LPYP_KEY_END:
             /* Parsing finished */
@@ -102,7 +120,11 @@ Main parsing function. Returns 0 on success, 1 on error.
 int lpyp_help(t_lpyp_options *options, char *program_name, char *description);
 ```
 
-Prints detailed help information including usage and option descriptions.
+Prints detailed help information in professional GNU-style format, including:
+- Complete usage line with all options in bracket notation
+- Program description
+- Properly aligned option list with descriptions
+- Support for all option types (short, long, long-only, with/without arguments)
 
 #### `lpyp_usage`
 
@@ -110,7 +132,32 @@ Prints detailed help information including usage and option descriptions.
 int lpyp_usage(t_lpyp_options *options, char *program_name);
 ```
 
-Prints concise usage information.
+Prints concise usage information in GNU-style format showing all options in compact bracket notation. Perfect for error messages and quick reference.
+
+## Help and Usage Output Examples
+
+### Help Output (`./program --help`)
+
+```
+Usage: ./program [-v] [-o FILE] [-O[ LEVEL]] [--color[=WHEN]] [--debug] [-h] [--usage] FILES...
+
+Example program demonstrating LPYP.
+
+Options:
+  -v, --verbose      enable verbose output
+  -o, --output FILE  place the output into FILE
+  -O [LEVEL]         optimize code (level 0-3)
+      --color[=WHEN] colorize output
+      --debug        enable debug mode
+  -h, --help         give this help list
+      --usage        give a short usage message
+```
+
+### Usage Output (`./program --usage`)
+
+```
+Usage: ./program [-v] [-o FILE] [-O[ LEVEL]] [--color[=WHEN]] [--debug] [-h] [--usage] FILES...
+```
 
 ## Examples
 
@@ -118,19 +165,40 @@ Prints concise usage information.
 
 ```bash
 ./program -v --output=results.txt input.txt
-./program -vh -o results.txt input.txt
+./program -vh -o results.txt input.txt  
 ./program --verbose --help
+./program -O2 --color=always file1.c file2.c
+./program --debug --color file.txt
+```
+
+### Option Types
+
+```bash
+# Short options with arguments
+./program -o output.txt -O3
+
+# Long options with arguments  
+./program --output=output.txt --color=never
+
+# Long-only options
+./program --debug --usage
+
+# Optional arguments
+./program -O            # Uses default optimization level
+./program -O2           # Uses optimization level 2
+./program --color       # Uses default color setting
+./program --color=auto  # Uses specific color setting
 ```
 
 ### Duplicate Option Control
 
 ```bash
 # Options without LPYP_DENY_DUPLICATE can be repeated
-./program -v -v --verbose          # ✅ Works - multiple verbose flags
+./program -v -v --verbose          # Works - multiple verbose flags
 
 # Options with LPYP_DENY_DUPLICATE cannot be repeated  
-./program --output=file1 --output=file2  # ❌ Error: option already specified
-./program -d --debug                     # ❌ Error: option already specified
+./program --output=file1 --output=file2  # Error: option already specified
+./program -d --debug                     # Error: option already specified
 ```
 
 ### Error Handling
