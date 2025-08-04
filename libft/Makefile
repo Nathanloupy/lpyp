@@ -1,6 +1,6 @@
 NAME		= libft.a
 
-SRCS		= ft_isalpha.c \
+SRCS_LIBFT	= ft_isalpha.c \
 			ft_isdigit.c \
 			ft_isalnum.c \
 			ft_isascii.c \
@@ -33,10 +33,19 @@ SRCS		= ft_isalpha.c \
 			ft_putendl_fd.c \
 			ft_putnbr_fd.c
 
-OBJS		= $(SRCS:.c=.o)
+SRCS_FT_PRINTF	= ft_printf/ft_printf.c \
+			ft_printf/ft_putchars.c \
+			ft_printf/ft_putint10.c \
+			ft_printf/ft_putptr.c \
+			ft_printf/ft_putuint16.c
+
+OBJS_LIBFT		= $(SRCS_LIBFT:.c=.o)
+OBJS_FT_PRINTF	= $(SRCS_FT_PRINTF:.c=.o)
+
+OBJS			= $(OBJS_LIBFT) $(OBJS_FT_PRINTF)
 
 CC			= cc
-CFLAGS		= -Wall -Wextra -Werror
+CFLAGS		= -Wall -Wextra -Werror -I. -I./ft_printf
 
 AR			= ar
 ARFLAGS		= rcs
