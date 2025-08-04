@@ -1,33 +1,34 @@
 # Makefile for lpyp-2.0.0
 
-NAME		= lpyp.a
+NAME			= lpyp.a
 
-SRC_DIR		= src
+LIBFT_DIR		= libft
+LIBFT_ARCHIVE	= libft.a
 
-SRC_FILES	= lpyp_parse.c lpyp_help.c
-SRCS		= $(addprefix $(SRC_DIR)/, $(SRC_FILES))
+SRC_DIR			= src
 
-OBJS		= $(SRCS:.c=.o)
+SRC_FILES		= lpyp_parse.c lpyp_help.c
+SRCS			= $(addprefix $(SRC_DIR)/, $(SRC_FILES))
 
-GREEN		= \033[0;32m
-BLUE		= \033[0;34m
-YELLOW		= \033[0;33m
-RED			= \033[0;31m
-RESET		= \033[0m
+OBJS			= $(SRCS:.c=.o)
 
-CC			= cc
-CFLAGS		= -Wall -Wextra -Werror -Iinclude -Ilibft
-AR			= ar
-ARFLAGS		= rcs
-RM			= rm -f
+GREEN			= \033[0;32m
+BLUE			= \033[0;34m
+YELLOW			= \033[0;33m
+RED				= \033[0;31m
+RESET			= \033[0m
 
-LIBFT		= libft/libft.a
+CC				= cc
+CFLAGS			= -Wall -Wextra -Werror -Iinclude -I$(LIBFT_DIR)
+AR				= ar
+ARFLAGS			= rcs
+RM				= rm -f
 
 all: $(NAME) ## Compile lpyp library and libft.
 
 $(NAME): $(OBJS)
-	@echo "$(BLUE)Compiling libft...$(RESET)"
-	@make -s --no-print-directory -C libft
+	@echo "$(BLUE)Creating archive $(LIBFT_ARCHIVE)...$(RESET)"
+	@make -s --no-print-directory -C $(LIBFT_DIR)
 	@echo "$(GREEN)Creating archive $(NAME)...$(RESET)"
 	@$(AR) $(ARFLAGS) $(NAME) $(OBJS)
 
@@ -38,14 +39,14 @@ $(NAME): $(OBJS)
 clean: ## Remove object files.
 	@echo "$(RED)Cleaning object files...$(RESET)"
 	@$(RM) $(OBJS)
-	@make -s --no-print-directory -C libft clean
+	@make -s --no-print-directory -C $(LIBFT_DIR) clean
 
 fclean: ## Remove all generated files.
 	@echo "$(RED)Cleaning object files...$(RESET)"
 	@$(RM) $(OBJS)
 	@echo "$(RED)Cleaning library...$(RESET)"
 	@$(RM) $(NAME)
-	@make -s --no-print-directory -C libft fclean
+	@make -s --no-print-directory -C $(LIBFT_DIR) fclean
 
 re: fclean all ## Re-compile the entire project.
 
