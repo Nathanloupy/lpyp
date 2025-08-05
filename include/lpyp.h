@@ -8,6 +8,7 @@
 #define LPYP_REQUIRED_ARG	0x01	/* Option requires an argument */
 #define LPYP_OPTIONAL_ARG	0x02	/* Option has optional argument */
 #define LPYP_DENY_DUPLICATE	0x04	/* Option cannot appear multiple times */
+#define LPYP_SEEN			0x08	/* Option has been seen (internal use) */
 
 /* Special keys for non-option arguments */
 #define LPYP_KEY_ARG		0x80000000	/* Non-option argument */
@@ -28,7 +29,8 @@ typedef struct s_lpyp_options
 typedef int	(*t_lpyp_parser)(unsigned int key, void *data, char *argument);
 
 /* Function prototypes */
-int	lpyp_parse(void *data, int argc, char **argv, t_lpyp_options *options, t_lpyp_parser parser_func);
-int	lpyp_help(t_lpyp_options *options, char *program_name, char *description);
-int	lpyp_usage(t_lpyp_options *options, char *program_name);
+int		lpyp_parse(void *data, int argc, char **argv, t_lpyp_options *options, t_lpyp_parser parser_func);
+int		lpyp_help(t_lpyp_options *options, char *program_name, char *description);
+int		lpyp_usage(t_lpyp_options *options, char *program_name);
+void	lpyp_reset_options(t_lpyp_options *options);
  

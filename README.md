@@ -97,6 +97,7 @@ typedef struct s_lpyp_options
 - `LPYP_REQUIRED_ARG`: Option requires an argument
 - `LPYP_OPTIONAL_ARG`: Option has an optional argument
 - `LPYP_DENY_DUPLICATE`: Option cannot appear multiple times
+- `LPYP_SEEN`: Internal flag indicating option has been seen (automatically managed)
 
 ### Special Keys
 
@@ -133,6 +134,14 @@ int lpyp_usage(t_lpyp_options *options, char *program_name);
 ```
 
 Prints concise usage information in GNU-style format showing all options in compact bracket notation. Perfect for error messages and quick reference.
+
+#### `lpyp_reset_options`
+
+```c
+void lpyp_reset_options(t_lpyp_options *options);
+```
+
+Resets the internal seen flags for all options, allowing the same options array to be reused for multiple parsing sessions. This function clears the `LPYP_SEEN` flags that track duplicate options when `LPYP_DENY_DUPLICATE` is used.
 
 ## Help and Usage Output Examples
 
@@ -215,6 +224,28 @@ Usage: ./program [-v] [-o FILE] [-O[ LEVEL]] [--color[=WHEN]] [--debug] [-h] [--
 ./program file.txt -- --not-an-option    # Everything after -- treated as arguments
 ./program --help                         # Show help
 ./program                                # Show usage
+```
+
+### Reusing Options Array
+
+If you need to parse arguments multiple times with the same options array (e.g., in interactive programs or testing), use `lpyp_reset_options` to clear the internal state:
+
+```c
+t_lpyp_options options[] = {
+    {'o', "output", 'o', LPYP_REQUIRED_ARG | LPYP_DENY_DUPLICATE, "output file", "FILE"},
+    {0, NULL, 0, 0, NULL, NULL} /* Sentinel */
+};
+
+// First parsing session
+my_data_t data1 = {0};
+lpyp_parse(&data1, argc1, argv1, options, my_parser);
+
+// Reset for reuse
+lpyp_reset_options(options);
+
+// Second parsing session (works even with LPYP_DENY_DUPLICATE options)
+my_data_t data2 = {0};
+lpyp_parse(&data2, argc2, argv2, options, my_parser);
 ```
 
 ## Building

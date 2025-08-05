@@ -1,21 +1,10 @@
 #include "lpyp.h"
 
-/* Helper function to check if option key has been seen before */
-static int	check_duplicate(unsigned int *seen_keys, int seen_count, unsigned int key)
+/* Helper function to check if option has been seen before */
+static int	check_duplicate(t_lpyp_options *option)
 {
-	int	i;
-
-	i = 0;
-	while (i < seen_count)
-	{
-		if (seen_keys[i] == key)
-			return (1);
-		i++;
-	}
-	return (0);
+	return (option->flags & LPYP_SEEN);
 }
-
-
 
 /* Helper function to find option by short name */
 static t_lpyp_options	*find_short_option(t_lpyp_options *options, char c)
@@ -49,7 +38,7 @@ static t_lpyp_options	*find_long_option(t_lpyp_options *options, char *name)
 }
 
 /* Helper function to handle short options */
-static int	handle_short_option(char c, t_lpyp_options *options, char **argv, int *i, int argc, void *data, t_lpyp_parser parser_func, unsigned int *seen_keys, int *seen_count)
+static int	handle_short_option(char c, t_lpyp_options *options, char **argv, int *i, int argc, void *data, t_lpyp_parser parser_func)
 {
 	t_lpyp_options	*option;
 	char			*argument;
@@ -63,7 +52,7 @@ static int	handle_short_option(char c, t_lpyp_options *options, char **argv, int
 		return (parser_func(LPYP_KEY_UNKNOWN, data, NULL));
 	}
 
-	if ((option->flags & LPYP_DENY_DUPLICATE) && check_duplicate(seen_keys, *seen_count, option->key))
+	if ((option->flags & LPYP_DENY_DUPLICATE) && check_duplicate(option))
 	{
 		ft_putstr_fd("lpyp: option '", 2);
 		ft_putchar_fd(c, 2);
@@ -71,8 +60,7 @@ static int	handle_short_option(char c, t_lpyp_options *options, char **argv, int
 		return (1);
 	}
 
-	seen_keys[*seen_count] = option->key;
-	(*seen_count)++;
+	option->flags |= LPYP_SEEN;
 
 	argument = NULL;
 	if (option->flags & LPYP_REQUIRED_ARG)
@@ -100,7 +88,7 @@ static int	handle_short_option(char c, t_lpyp_options *options, char **argv, int
 }
 
 /* Helper function to handle long options */
-static int	handle_long_option(char *arg, t_lpyp_options *options, char **argv, int *i, int argc, void *data, t_lpyp_parser parser_func, unsigned int *seen_keys, int *seen_count)
+static int	handle_long_option(char *arg, t_lpyp_options *options, char **argv, int *i, int argc, void *data, t_lpyp_parser parser_func)
 {
 	t_lpyp_options	*option;
 	char			*option_name;
@@ -126,7 +114,7 @@ static int	handle_long_option(char *arg, t_lpyp_options *options, char **argv, i
 		return (parser_func(LPYP_KEY_UNKNOWN, data, NULL));
 	}
 
-	if ((option->flags & LPYP_DENY_DUPLICATE) && check_duplicate(seen_keys, *seen_count, option->key))
+	if ((option->flags & LPYP_DENY_DUPLICATE) && check_duplicate(option))
 	{
 		ft_putstr_fd("lpyp: option '--", 2);
 		ft_putstr_fd(option_name, 2);
@@ -135,8 +123,7 @@ static int	handle_long_option(char *arg, t_lpyp_options *options, char **argv, i
 		return (1);
 	}
 
-	seen_keys[*seen_count] = option->key;
-	(*seen_count)++;
+	option->flags |= LPYP_SEEN;
 
 	argument = NULL;
 	if (option->flags & LPYP_REQUIRED_ARG)
@@ -178,29 +165,13 @@ int	lpyp_parse(void *data, int argc, char **argv, t_lpyp_options *options, t_lpy
 	int	i;
 	int	j;
 	int	result;
-	unsigned int *seen_keys;
-	int seen_count;
-	int total_option_chars;
 
-	total_option_chars = 0;
-	i = 1;
-	while (i < argc)
+	i = 0;
+	while (options[i].key != 0)
 	{
-		if (ft_strncmp(argv[i], "--", 2) == 0)
-			total_option_chars += 1;
-		else if (argv[i][0] == '-' && ft_strlen(argv[i]) > 1)
-			total_option_chars += ft_strlen(argv[i]) - 1;
-		else
-			total_option_chars += 1;
+		options[i].flags &= ~LPYP_SEEN;
 		i++;
 	}
-	if (total_option_chars < argc)
-		total_option_chars = argc;
-
-	seen_keys = ft_calloc(total_option_chars, sizeof(unsigned int));
-	if (!seen_keys)
-		return (1);
-	seen_count = 0;
 
 	i = 1;
 	while (i < argc)
@@ -212,12 +183,9 @@ int	lpyp_parse(void *data, int argc, char **argv, t_lpyp_options *options, t_lpy
 				i++;
 				break;
 			}
-			result = handle_long_option(argv[i] + 2, options, argv, &i, argc, data, parser_func, seen_keys, &seen_count);
+			result = handle_long_option(argv[i] + 2, options, argv, &i, argc, data, parser_func);
 			if (result != 0)
-			{
-				free(seen_keys);
 				return (result);
-			}
 		}
 		else if (argv[i][0] == '-' && ft_strlen(argv[i]) > 1)
 		{
@@ -227,12 +195,9 @@ int	lpyp_parse(void *data, int argc, char **argv, t_lpyp_options *options, t_lpy
 			while (argv[i][j])
 			{
 				current_i = i;
-				result = handle_short_option(argv[i][j], options, argv, &i, argc, data, parser_func, seen_keys, &seen_count);
+				result = handle_short_option(argv[i][j], options, argv, &i, argc, data, parser_func);
 				if (result != 0)
-				{
-					free(seen_keys);
 					return (result);
-				}
 				if (i != current_i)
 					break;
 				j++;
@@ -242,10 +207,7 @@ int	lpyp_parse(void *data, int argc, char **argv, t_lpyp_options *options, t_lpy
 		{
 			result = parser_func(LPYP_KEY_ARG, data, argv[i]);
 			if (result != 0)
-			{
-				free(seen_keys);
 				return (result);
-			}
 		}
 		i++;
 	}
@@ -254,13 +216,22 @@ int	lpyp_parse(void *data, int argc, char **argv, t_lpyp_options *options, t_lpy
 	{
 		result = parser_func(LPYP_KEY_ARG, data, argv[i]);
 		if (result != 0)
-		{
-			free(seen_keys);
 			return (result);
-		}
 		i++;
 	}
 
-	free(seen_keys);
 	return (parser_func(LPYP_KEY_END, data, NULL));
+}
+
+/* Function to reset LPYP_SEEN flags for option reuse */
+void	lpyp_reset_options(t_lpyp_options *options)
+{
+	int	i;
+	
+	i = 0;
+	while (options[i].key != 0)
+	{
+		options[i].flags &= ~LPYP_SEEN;
+		i++;
+	}
 }
