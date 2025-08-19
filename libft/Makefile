@@ -33,19 +33,15 @@ SRCS_LIBFT	= ft_isalpha.c \
 			ft_putendl_fd.c \
 			ft_putnbr_fd.c
 
-SRCS_FT_PRINTF	= ft_printf/ft_printf.c \
-			ft_printf/ft_putchars.c \
-			ft_printf/ft_putint10.c \
-			ft_printf/ft_putptr.c \
-			ft_printf/ft_putuint16.c
+SRCS_FT_DPRINTF	= ft_dprintf.c
 
 OBJS_LIBFT		= $(SRCS_LIBFT:.c=.o)
-OBJS_FT_PRINTF	= $(SRCS_FT_PRINTF:.c=.o)
+OBJS_FT_DPRINTF	= $(SRCS_FT_DPRINTF:.c=.o)
 
-OBJS			= $(OBJS_LIBFT) $(OBJS_FT_PRINTF)
+OBJS			= $(OBJS_LIBFT) $(OBJS_FT_DPRINTF)
 
 CC			= cc
-CFLAGS		= -Wall -Wextra -Werror -I. -I./ft_printf
+CFLAGS		= -Wall -Wextra -Werror -I.
 
 AR			= ar
 ARFLAGS		= rcs

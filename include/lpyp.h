@@ -1,7 +1,6 @@
 #pragma once
 
 #include "libft.h"
-#include <stdio.h>
 
 /* Option flags for t_lpyp_optionss */
 #define LPYP_NO_ARG			0x00	/* Option takes no argument */
